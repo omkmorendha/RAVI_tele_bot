@@ -6,6 +6,10 @@ name = "pypi"
 [packages]
 pytelegrambotapi = "*"
 python-dotenv = "*"
+python-telegram-bot = "*"
+boto3 = "*"
+mysql-connector-python = "*"
+pymysql = "*"
 
 [dev-packages]
 
