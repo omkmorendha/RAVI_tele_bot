@@ -7,6 +7,7 @@
     "M6message" : "Please write the city or resistance area of yourself or the individual for whom you are providing testimony.",
     "M7message" : "Please tell us who or what organization violated your rights",
     "M8message" : "Please choose the type of violation or abuse that you or the individual for whom you are providing testimony endured.",
+    "M9message" : "Please submit your final testimony.(It can be voice message, text or video but upload as Document)",
 
     "S1message" : "Sending testimony",
     "S2message" : "Identifying the violator of human rights",
@@ -34,5 +35,8 @@
     "redirect_message" : "Click [here](https://t.me/@iranhamava) to send a message to an operator.",
     "edit_message" : "Edit Previous Message",
     "restart_message" : "Restart Everything",
-    "choose_options" : "Choose an option or type directly"
+    "choose_options" : "Revert back or type directly",
+    "upload_options" : "Revert back or upload file",
+    "successful_upload" : "Upload successful",
+    "invalid_message" : "Invalid"
 }

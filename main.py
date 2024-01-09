@@ -1,4 +1,5 @@
 import os
+from re import U
 import pymysql
 import boto3
 import json
@@ -32,6 +33,7 @@ with open("messages.json", "r") as json_file:
 class User:
     def __init__(self, message):
         self.attributes = {}
+        self.current_state = None
         users[message.from_user.id] = self
 
     def M1(self, message):
@@ -153,13 +155,8 @@ class User:
 
         inline_markup.add(button1, button2)
 
-        reply_markup = types.ReplyKeyboardMarkup(row_width=2, one_time_keyboard=True)
-        direct_button1 = types.KeyboardButton("Direct Input 1")
-        direct_button2 = types.KeyboardButton("Direct Input 2")
-        reply_markup.add(direct_button1, direct_button2)
-
         bot.send_message(message.chat.id, message_txt, reply_markup=inline_markup)
-        bot.send_message(message.chat.id, strings.get("choose_options", ""), reply_markup=reply_markup)
+        bot.send_message(message.chat.id, strings.get("choose_options", ""))
         
         self.current_state = "M6"
     
@@ -176,13 +173,8 @@ class User:
 
         inline_markup.add(button1, button2)
 
-        reply_markup = types.ReplyKeyboardMarkup(row_width=2, one_time_keyboard=True)
-        direct_button1 = types.KeyboardButton("Direct Input 1")
-        direct_button2 = types.KeyboardButton("Direct Input 2")
-        reply_markup.add(direct_button1, direct_button2)
-
         bot.send_message(message.chat.id, message_txt, reply_markup=inline_markup)
-        bot.send_message(message.chat.id, strings.get("choose_options", ""), reply_markup=reply_markup)
+        bot.send_message(message.chat.id, strings.get("choose_options", ""))
         
         self.current_state = "M7"
     
@@ -215,8 +207,23 @@ class User:
         bot.send_message(message.chat.id, message_txt, reply_markup=markup)
     
     def M9(self, message):
-        pass
+        inline_markup = types.InlineKeyboardMarkup()
+        message_txt = strings.get("M9message", "")
 
+        button1 = types.InlineKeyboardButton(
+            strings.get("edit_message", ""), callback_data="M8"
+        )
+        button2 = types.InlineKeyboardButton(
+            strings.get("restart_message", ""), callback_data="start"
+        )
+
+        inline_markup.add(button1, button2)
+
+        bot.send_message(message.chat.id, message_txt)
+        bot.send_message(message.chat.id, strings.get("upload_options", ""), reply_markup=inline_markup)
+
+        self.current_state = "M9"
+    
     def save_to_database(self):
         conn = pymysql.connect(
             host=RDS_HOST,
@@ -248,7 +255,7 @@ def send_messages(message):
     new_user.M1(message)
 
 # Message handler for direct input
-@bot.message_handler(func=lambda message: hasattr(message, 'text'))
+@bot.message_handler(func=lambda message: True) #hasattr(message, 'text'))
 def handle_direct_input(message):
     user_instance = users.get(message.from_user.id, None)
 
@@ -262,6 +269,52 @@ def handle_direct_input(message):
             user_instance.attributes["Violating_Organisation"] = message.text
             user_instance.current_state = None
             user_instance.M8(message)
+
+
+def upload(message):
+    try:
+        if message.document:
+            file_name = message.document.file_name
+            file_info = bot.get_file(message.document.file_id)
+            downloaded_file = bot.download_file(file_info.file_path)
+               
+            # Save the downloaded file
+            with open(file_name, 'wb+') as new_file:
+                new_file.write(downloaded_file)
+
+            # Upload the file to S3 bucket
+            s3_object_name = f"user_{message.from_user.id}_{file_name}"
+            s3_client.upload_file(file_name, S3_BUCKET_NAME, s3_object_name)
+
+            os.remove(file_name)
+            s3url = f'https://{S3_BUCKET_NAME}.s3.amazonaws.com/{s3_object_name}'
+            bot.send_message(message.chat.id, strings.get("successful_upload", ""))
+            
+            return s3url
+
+    except Exception as e:
+        bot.send_message(message.chat.id, f"An error occurred while processing the file. {e}")
+        return None
+    
+            
+@bot.message_handler(content_types=['document', 'photo', 'audio', 'video', 'voice'])
+def handle_file_upload(message):
+    user_instance = users.get(message.from_user.id, None)
+    if user_instance is None:
+        user_instance = User()
+
+    if not user_instance.current_state:
+        bot.send_message(message.chat.id, strings.get("invalid_message", ""))
+
+    elif user_instance.current_state == "M9":
+        user_instance.attributes["Final_Testimony_URL"] = upload(message)
+        
+        if user_instance.attributes["Final_Testimony_URL"] is not None:
+            user_instance.current_state = None
+    
+    else:
+        bot.send_message(message.chat.id, strings.get("invalid_message", ""))
+            
 
 @bot.callback_query_handler(func=lambda call: True)
 def handle_callback_query(call):
@@ -294,7 +347,6 @@ def handle_callback_query(call):
     
     elif call.data in ["S18", "S19", "S20", "S21", "S22"]:
         user_instance.attributes["Type_of_violation"] = strings.get(call.data + "message", "")
-        print(user_instance.attributes)
         user_instance.M9(call.message)
         
     elif call.data == "start":
