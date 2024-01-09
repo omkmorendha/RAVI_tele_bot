@@ -1,0 +1,7 @@
+{
+    "M1message" : "Hi,\nI am RAVI, Ham Awa Association bot and the narrator of your story, so that the violence against Iranian girls and women is not forgotten in the dark.\nSome questions will be asked in order for you to submit your story; please follow the processes until you reach the finish of your story.\nPlease choose one of the options:",
+    "S1message" : "Sending testimony",
+    "S2message" : "Identifying the violator of human rights",
+    "S3message" : "Contact with operator",
+    "redirect_message" : "Click [here](https://t.me/@iranhamava) to send a message to an operator."
+}
