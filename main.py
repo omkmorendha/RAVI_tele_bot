@@ -26,52 +26,64 @@ s3_client = boto3.client(
 )
 
 
-with open("messages.json", "r") as json_file:
-    strings = json.load(json_file)
+with open("messages_eng.json", "r") as json_file:
+    strings_eng = json.load(json_file)
 
+with open("messages_farsi.json", "r") as json_file:
+    strings_farsi = json.load(json_file)
 
 class User:
     def __init__(self, message):
         self.attributes = {}
         self.current_state = None
+        self.strings = strings_eng
         users[message.from_user.id] = self
+
+    def switch_lang(self):
+        if(self.strings == strings_eng):
+            self.strings = strings_farsi
+        else:
+            self.strings = strings_eng
 
     def M1(self, message):
         markup = types.InlineKeyboardMarkup(row_width=1)
-        message_txt = strings.get("M1message", "")
+        message_txt = self.strings.get("M1message", "")
         button1 = types.InlineKeyboardButton(
-            strings.get("S1message", ""), callback_data="S1"
+            self.strings.get("S1message", ""), callback_data="S1"
         )
         button2 = types.InlineKeyboardButton(
-            strings.get("S2message", ""), callback_data="S2"
+            self.strings.get("S2message", ""), callback_data="S2"
         )
         button3 = types.InlineKeyboardButton(
-            strings.get("S3message", ""), callback_data="S3"
+            self.strings.get("S3message", ""), callback_data="S3"
+        )
+        button4 = types.InlineKeyboardButton(
+            self.strings.get("lang_switch", ""), callback_data="lang_switch"
         )
 
-        markup.add(button1, button2, button3)
+        markup.add(button1, button2, button3, button4)
         bot.send_message(message.chat.id, message_txt, reply_markup=markup)
 
     def M2(self, message):
         markup = types.InlineKeyboardMarkup()
-        message_txt = strings.get("M2message", "")
+        message_txt = self.strings.get("M2message", "")
         button1 = types.InlineKeyboardButton(
-            strings.get("S4message", ""), callback_data="S4"
+            self.strings.get("S4message", ""), callback_data="S4"
         )
         button2 = types.InlineKeyboardButton(
-            strings.get("S5message", ""), callback_data="S5"
+            self.strings.get("S5message", ""), callback_data="S5"
         )
         button3 = types.InlineKeyboardButton(
-            strings.get("S6message", ""), callback_data="S6"
+            self.strings.get("S6message", ""), callback_data="S6"
         )
         button4 = types.InlineKeyboardButton(
-            strings.get("S7message", ""), callback_data="S7"
+            self.strings.get("S7message", ""), callback_data="S7"
         )
         button5 = types.InlineKeyboardButton(
-            strings.get("S8message", ""), callback_data="S8"
+            self.strings.get("S8message", ""), callback_data="S8"
         )
         button6 = types.InlineKeyboardButton(
-            strings.get("edit_message", ""), callback_data="start"
+            self.strings.get("edit_message", ""), callback_data="start"
         )
         
         markup.add(button1, button2, button3, button4, button5, button6)
@@ -79,39 +91,39 @@ class User:
 
     def M3(self, message):
         markup = types.InlineKeyboardMarkup()
-        message_txt = strings.get("M3message", "")
+        message_txt = self.strings.get("M3message", "")
         button1 = types.InlineKeyboardButton(
-            strings.get("S9message", ""), callback_data="S9"
+            self.strings.get("S9message", ""), callback_data="S9"
         )
         button2 = types.InlineKeyboardButton(
-            strings.get("S10message", ""), callback_data="S10"
+            self.strings.get("S10message", ""), callback_data="S10"
         )
         button3 = types.InlineKeyboardButton(
-            strings.get("edit_message", ""), callback_data="S1"
+            self.strings.get("edit_message", ""), callback_data="S1"
         )
         button4 = types.InlineKeyboardButton(
-            strings.get("restart_message", ""), callback_data="start"
+            self.strings.get("restart_message", ""), callback_data="start"
         )
         markup.add(button1, button2, button3, button4)
         bot.send_message(message.chat.id, message_txt, reply_markup=markup)
     
     def M4(self, message):
         markup = types.InlineKeyboardMarkup()
-        message_txt = strings.get("M4message", "")
+        message_txt = self.strings.get("M4message", "")
         button1 = types.InlineKeyboardButton(
-            strings.get("S11message", ""), callback_data="S11"
+            self.strings.get("S11message", ""), callback_data="S11"
         )
         button2 = types.InlineKeyboardButton(
-            strings.get("S12message", ""), callback_data="S12"
+            self.strings.get("S12message", ""), callback_data="S12"
         )
         button3 = types.InlineKeyboardButton(
-            strings.get("S13message", ""), callback_data="S13"
+            self.strings.get("S13message", ""), callback_data="S13"
         )
         button4 = types.InlineKeyboardButton(
-            strings.get("edit_message", ""), callback_data="M3"
+            self.strings.get("edit_message", ""), callback_data="M3"
         )
         button5 = types.InlineKeyboardButton(
-            strings.get("restart_message", ""), callback_data="start"
+            self.strings.get("restart_message", ""), callback_data="start"
         )
         
         markup.add(button1, button2, button3, button4, button5)
@@ -119,24 +131,24 @@ class User:
     
     def M5(self, message):
         markup = types.InlineKeyboardMarkup()
-        message_txt = strings.get("M5message", "")
+        message_txt = self.strings.get("M5message", "")
         button1 = types.InlineKeyboardButton(
-            strings.get("S14message", ""), callback_data="S14"
+            self.strings.get("S14message", ""), callback_data="S14"
         )
         button2 = types.InlineKeyboardButton(
-            strings.get("S15message", ""), callback_data="S15"
+            self.strings.get("S15message", ""), callback_data="S15"
         )
         button3 = types.InlineKeyboardButton(
-            strings.get("S16message", ""), callback_data="S16"
+            self.strings.get("S16message", ""), callback_data="S16"
         )
         button4 = types.InlineKeyboardButton(
-            strings.get("S17message", ""), callback_data="S17"
+            self.strings.get("S17message", ""), callback_data="S17"
         )
         button5 = types.InlineKeyboardButton(
-            strings.get("edit_message", ""), callback_data="M4"
+            self.strings.get("edit_message", ""), callback_data="M4"
         )
         button6 = types.InlineKeyboardButton(
-            strings.get("restart_message", ""), callback_data="start"
+            self.strings.get("restart_message", ""), callback_data="start"
         )
         
         markup.add(button1, button2, button3, button4, button5, button6)
@@ -144,63 +156,63 @@ class User:
     
     def M6(self, message):
         inline_markup = types.InlineKeyboardMarkup()
-        message_txt = strings.get("M6message", "")
+        message_txt = self.strings.get("M6message", "")
         
         button1 = types.InlineKeyboardButton(
-            strings.get("edit_message", ""), callback_data="M5"
+            self.strings.get("edit_message", ""), callback_data="M5"
         )
         button2 = types.InlineKeyboardButton(
-            strings.get("restart_message", ""), callback_data="start"
+            self.strings.get("restart_message", ""), callback_data="start"
         )
 
         inline_markup.add(button1, button2)
 
         bot.send_message(message.chat.id, message_txt, reply_markup=inline_markup)
-        bot.send_message(message.chat.id, strings.get("choose_options", ""))
+        bot.send_message(message.chat.id, self.strings.get("choose_options", ""))
         
         self.current_state = "M6"
     
     def M7(self, message):
         inline_markup = types.InlineKeyboardMarkup()
-        message_txt = strings.get("M7message", "")
+        message_txt = self.strings.get("M7message", "")
         
         button1 = types.InlineKeyboardButton(
-            strings.get("edit_message", ""), callback_data="M6"
+            self.strings.get("edit_message", ""), callback_data="M6"
         )
         button2 = types.InlineKeyboardButton(
-            strings.get("restart_message", ""), callback_data="start"
+            self.strings.get("restart_message", ""), callback_data="start"
         )
 
         inline_markup.add(button1, button2)
 
         bot.send_message(message.chat.id, message_txt, reply_markup=inline_markup)
-        bot.send_message(message.chat.id, strings.get("choose_options", ""))
+        bot.send_message(message.chat.id, self.strings.get("choose_options", ""))
         
         self.current_state = "M7"
     
     def M8(self, message):
         markup = types.InlineKeyboardMarkup()
-        message_txt = strings.get("M8message", "")
+        message_txt = self.strings.get("M8message", "")
         button1 = types.InlineKeyboardButton(
-            strings.get("S18message", ""), callback_data="S18"
+            self.strings.get("S18message", ""), callback_data="S18"
         )
         button2 = types.InlineKeyboardButton(
-            strings.get("S19message", ""), callback_data="S19"
+            self.strings.get("S19message", ""), callback_data="S19"
         )
         button3 = types.InlineKeyboardButton(
-            strings.get("S20message", ""), callback_data="S20"
+            self.strings.get("S20message", ""), callback_data="S20"
         )
         button4 = types.InlineKeyboardButton(
-            strings.get("S21message", ""), callback_data="S21"
+            self.strings.get("S21message", ""), callback_data="S21"
         )
         button5 = types.InlineKeyboardButton(
-            strings.get("S22message", ""), callback_data="S22"
+            self.strings.get("S22message", ""), callback_data="S22"
         )
         button6 = types.InlineKeyboardButton(
-            strings.get("edit_message", ""), callback_data="M4"
+            self.strings.get("edit_message", ""), callback_data="M4"
         )
         button7 = types.InlineKeyboardButton(
-            strings.get("restart_message", ""), callback_data="start"
+            self.strings.get("restart_message", ""), callback_data="start"
         )
         
         markup.add(button1, button2, button3, button4, button5, button6, button7)
@@ -208,19 +220,19 @@ class User:
     
     def M9(self, message):
         inline_markup = types.InlineKeyboardMarkup()
-        message_txt = strings.get("M9message", "")
+        message_txt = self.trings.get("M9message", "")
 
         button1 = types.InlineKeyboardButton(
-            strings.get("edit_message", ""), callback_data="M8"
+            self.strings.get("edit_message", ""), callback_data="M8"
         )
         button2 = types.InlineKeyboardButton(
-            strings.get("restart_message", ""), callback_data="start"
+            self.strings.get("restart_message", ""), callback_data="start"
         )
 
         inline_markup.add(button1, button2)
 
         bot.send_message(message.chat.id, message_txt)
-        bot.send_message(message.chat.id, strings.get("upload_options", ""), reply_markup=inline_markup)
+        bot.send_message(message.chat.id, self.strings.get("upload_options", ""), reply_markup=inline_markup)
 
         self.current_state = "M9"
     
@@ -244,8 +256,9 @@ class User:
             conn.close()
 
 
-def redirect_to_user(chat_id_to_redirect):
-    redirect_message = strings.get("redirect_message", "")
+def redirect_to_user(message, chat_id_to_redirect):
+    user_instance = users["chat_id_to_redirect"]
+    redirect_message = user_instance.strings.get("redirect_message", "")
     bot.send_message(chat_id_to_redirect, redirect_message, parse_mode="markdown")
 
 
@@ -272,6 +285,8 @@ def handle_direct_input(message):
 
 
 def upload(message):
+    user_instance = users.get(message.from_user.id, None)
+    
     try:
         if message.document:
             file_name = message.document.file_name
@@ -288,7 +303,7 @@ def upload(message):
 
             os.remove(file_name)
             s3url = f'https://{S3_BUCKET_NAME}.s3.amazonaws.com/{s3_object_name}'
-            bot.send_message(message.chat.id, strings.get("successful_upload", ""))
+            bot.send_message(message.chat.id, user_instance.strings.get("successful_upload", ""))
             
             return s3url
 
@@ -304,7 +319,7 @@ def handle_file_upload(message):
         user_instance = User()
 
     if not user_instance.current_state:
-        bot.send_message(message.chat.id, strings.get("invalid_message", ""))
+        bot.send_message(message.chat.id, user_instance.strings.get("invalid_message", ""))
 
     elif user_instance.current_state == "M9":
         user_instance.attributes["Final_Testimony_URL"] = upload(message)
@@ -313,7 +328,7 @@ def handle_file_upload(message):
             user_instance.current_state = None
     
     else:
-        bot.send_message(message.chat.id, strings.get("invalid_message", ""))
+        bot.send_message(message.chat.id, user_instance.strings.get("invalid_message", ""))
             
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -330,24 +345,28 @@ def handle_callback_query(call):
         redirect_to_user(call.message.chat.id)
     
     elif call.data in ["S4", "S5", "S6", "S7", "S8"]:
-        user_instance.attributes["Violence"] = strings.get(call.data + "message", "")
+        user_instance.attributes["Violence"] = user_instance.strings.get(call.data + "message", "")
         user_instance.M3(call.message)
     
     elif call.data in ["S9", "S10"]:
-        user_instance.attributes["Testimony_for"] = strings.get(call.data + "message", "")
+        user_instance.attributes["Testimony_for"] = user_instance.strings.get(call.data + "message", "")
         user_instance.M4(call.message)
     
     elif call.data in ["S11", "S12", "S13"]:
-        user_instance.attributes["Gender"] = strings.get(call.data + "message", "")
+        user_instance.attributes["Gender"] = user_instance.strings.get(call.data + "message", "")
         user_instance.M5(call.message)
     
     elif call.data in ["S14", "S15", "S16", "S17"]:
-        user_instance.attributes["Age"] = strings.get(call.data + "message", "")
+        user_instance.attributes["Age"] = user_instance.strings.get(call.data + "message", "")
         user_instance.M6(call.message)
     
     elif call.data in ["S18", "S19", "S20", "S21", "S22"]:
-        user_instance.attributes["Type_of_violation"] = strings.get(call.data + "message", "")
+        user_instance.attributes["Type_of_violation"] = user_instance.strings.get(call.data + "message", "")
         user_instance.M9(call.message)
+        
+    elif call.data == "lang_switch":
+        user_instance.switch_lang()
+        user_instance.M1(call.message)    
         
     elif call.data == "start":
         user_instance.M1(call.message)

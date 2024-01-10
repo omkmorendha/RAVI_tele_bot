@@ -9,7 +9,7 @@
     "M8message" : "Please choose the type of violation or abuse that you or the individual for whom you are providing testimony endured.",
     "M9message" : "Please submit your final testimony.(It can be voice message, text or video but upload as Document)",
 
-    "S1message" : "Sending testimony",
+    "S1message" : "فرستادن روایت خشونت",
     "S2message" : "Identifying the violator of human rights",
     "S3message" : "Contact with operator",
     "S4message" : "Family",
@@ -32,6 +32,7 @@
     "S21message" : "Sexual Harrasment or Degradation",
     "S22message" : "Honor Murder/Suicide",
 
+    "lang_switch" : "Switch to Farsi",
     "redirect_message" : "Click [here](https://t.me/@iranhamava) to send a message to an operator.",
     "edit_message" : "Edit Previous Message",
     "restart_message" : "Restart Everything",
