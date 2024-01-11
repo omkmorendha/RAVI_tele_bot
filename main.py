@@ -240,6 +240,7 @@ class User:
         )
 
         self.current_state = "M9"
+        self.attributes["Final_Testimony_URL"] = []
 
     def M10(self, message):
         inline_markup = types.InlineKeyboardMarkup()
@@ -263,8 +264,9 @@ class User:
             self.strings.get("upload_options", ""),
             reply_markup=inline_markup,
         )
-
-        self.current_state = "M10"
+        
+        self.current_state = "M10"    
+        self.attributes["Additional_Evidence_URL"] = []
 
     def M11(self, message):
         inline_markup = types.InlineKeyboardMarkup()
@@ -342,10 +344,44 @@ class User:
 
         try:
             with conn.cursor() as cursor:
+                # Check if the table exists, and create it if not
+                table_exists_query = "SHOW TABLES LIKE 'user_data'"
+                cursor.execute(table_exists_query)
+                table_exists = cursor.fetchone()
+
+                if not table_exists:
+                    create_table_query = (
+                        f"CREATE TABLE user_data (Violence VARCHAR(255))"
+                    )
+                    cursor.execute(create_table_query)
+
+                # Get existing columns from the information_schema
+                cursor.execute(f"DESCRIBE user_data")
+                existing_columns = [column[0] for column in cursor.fetchall()]
+
+                if "Final_Testimony_URL" in self.attributes:            
+                    self.attributes['Final_Testimony_URL'] = " ".join(self.attributes['Final_Testimony_URL'])
+
+                if "Additional_Evidence_URL" in self.attributes:            
+                    self.attributes['Additional_Evidence_URL'] = " ".join(self.attributes['Additional_Evidence_URL'])
+
+                # Add new columns based on the keys in self.attributes
+                for key in self.attributes.keys():
+                    if key not in existing_columns:
+                        if key in ["Final_Testimony", "Additional_Evidence", "Final_Testimony_URL", "Additional Evidence"]:
+                            add_column_query = (f"ALTER TABLE user_data ADD COLUMN {key} VARCHAR(2048)")
+                        else:
+                            add_column_query = (f"ALTER TABLE user_data ADD COLUMN {key} VARCHAR(255)")
+                            
+                        cursor.execute(add_column_query)
+                        existing_columns.append(key)  # Update the list of existing columns
+
+                # Insert data into the table
                 columns = ", ".join(self.attributes.keys())
                 values = ", ".join(["%s"] * len(self.attributes))
-                sql = f"INSERT INTO user_data ({columns}) VALUES ({values})"
-                cursor.execute(sql, tuple(self.attributes.values()))
+                insert_query = f"INSERT INTO user_data ({columns}) VALUES ({values})"
+                cursor.execute(insert_query, tuple(self.attributes.values()))
+
             conn.commit()
         finally:
             conn.close()
@@ -383,6 +419,11 @@ def handle_direct_input(message):
             user_instance.attributes["Final_Testimony"] = message.text
             user_instance.current_state = None
             user_instance.M10(message)
+
+        elif user_instance.current_state == "M10":
+            user_instance.attributes["Additional_Evidence"] = message.text
+            user_instance.current_state = None
+            user_instance.M11(message)
 
 
 def upload(message):
@@ -430,14 +471,14 @@ def handle_file_upload(message):
         )
 
     elif user_instance.current_state == "M9":
-        user_instance.attributes["Final_Testimony_URL"] = upload(message)
+        user_instance.attributes["Final_Testimony_URL"].append(upload(message))
 
         if user_instance.attributes["Final_Testimony_URL"] is not None:
             user_instance.current_state = None
             user_instance.M10(message)
 
     elif user_instance.current_state == "M10":
-        user_instance.attributes["Additional_Evidence_URL"] = upload(message)
+        user_instance.attributes["Additional_Evidence_URL"].append(upload(message))
 
         if user_instance.attributes["Additional_Evidence_URL"] is not None:
             user_instance.current_state = None
@@ -533,6 +574,7 @@ def handle_callback_query(call):
         user_instance.M13(call.message)
 
     elif call.data == "M14":
+        user_instance.save_to_database()
         user_instance.M14(call.message)
 
     elif call.data == "extra_data":

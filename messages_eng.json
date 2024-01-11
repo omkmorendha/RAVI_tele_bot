@@ -50,5 +50,5 @@
     "upload_options" : "Revert back or upload file",
     "successful_upload" : "Upload successful",
     "invalid_message" : "Invalid",
-    "nofile_message" : "Don't add any file"
+    "nofile_message" : "Don't add any file/text"
 }

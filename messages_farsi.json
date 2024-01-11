@@ -41,7 +41,7 @@
     "S25message" : "Yes",
     "S26message" : "No",
 
-    "lang_switch" : "Switch to Farsi",
+    "lang_switch" : "Switch to English",
     "redirect_message" : "Click [here](https://t.me/@iranhamava) to send a message to an operator.",
     "edit_message" : "Edit Previous Message",
     "restart_message" : "Restart Everything",
