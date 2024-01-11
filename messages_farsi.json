@@ -8,6 +8,11 @@
     "M7message" : "Please tell us who or what organization violated your rights",
     "M8message" : "Please choose the type of violation or abuse that you or the individual for whom you are providing testimony endured.",
     "M9message" : "Please submit your final testimony.(It can be voice message, text or video but upload as Document)",
+    "M10message" : "Do you have any evidence that you'd like to share with us? Ex :Forensic medicine letter, Court letter, Pictures, Videos and ...",
+    "M11message" : "Do you want to change your prior answer?",
+    "M12message" : "Would you like to provide us with your Telegram id, Whatsapp or email address so we can contact you?",
+    "M13message" : "Please read the RAVI bot's legal terms and rules at this [link](https://iranhamava.org/). Your story will be sent if you accept our rules and policies. Please select one of the two choices below",
+    "M14message" : "Thank you for the big step you took to testify about human rights violations. Your story and bravery will inspire others and eventually change the world!",
 
     "S1message" : "فرستادن روایت خشونت",
     "S2message" : "Identifying the violator of human rights",
@@ -31,6 +36,10 @@
     "S20message" : "Verbal Abuse",
     "S21message" : "Sexual Harrasment or Degradation",
     "S22message" : "Honor Murder/Suicide",
+    "S23message" : "Yes",
+    "S24message" : "No",
+    "S25message" : "Yes",
+    "S26message" : "No",
 
     "lang_switch" : "Switch to Farsi",
     "redirect_message" : "Click [here](https://t.me/@iranhamava) to send a message to an operator.",
