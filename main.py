@@ -3,6 +3,7 @@ from re import U
 import pymysql
 import boto3
 import json
+import requests
 from telebot import TeleBot, types
 from dotenv import load_dotenv
 
@@ -468,22 +469,36 @@ def upload(message):
             file_name = message.document.file_name
             file_info = bot.get_file(message.document.file_id)
             downloaded_file = bot.download_file(file_info.file_path)
+        elif message.photo:
+            file_id = message.photo[-1].file_id
+            file_name = file_id + ".jpg"
+            file_info = bot.get_file(file_id)
+            file_path = file_info.file_path  
+            image_url = f'https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}'
+            downloaded_file = requests.get(image_url).content
+        elif message.video:
+            file_id = message.video.file_id
+            file_name = message.video.file_name
+            file_info = bot.get_file(file_id)
+            file_path = file_info.file_path  
+            video_url = f'https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}'
+            downloaded_file = requests.get(video_url).content  
 
-            # Save the downloaded file
-            with open(file_name, "wb+") as new_file:
-                new_file.write(downloaded_file)
+        # Save the downloaded file
+        with open(file_name, "wb+") as new_file:
+            new_file.write(downloaded_file)
 
-            # Upload the file to S3 bucket
-            s3_object_name = f"user_{message.from_user.id}_{file_name}"
-            s3_client.upload_file(file_name, S3_BUCKET_NAME, s3_object_name)
+        # Upload the file to S3 bucket
+        s3_object_name = f"user_{message.from_user.id}_{file_name}"
+        s3_client.upload_file(file_name, S3_BUCKET_NAME, s3_object_name)
 
-            os.remove(file_name)
-            s3url = f"https://{S3_BUCKET_NAME}.s3.amazonaws.com/{s3_object_name}"
-            bot.send_message(
-                message.chat.id, user_instance.strings.get("successful_upload", "")
-            )
+        os.remove(file_name)
+        s3url = f"https://{S3_BUCKET_NAME}.s3.amazonaws.com/{s3_object_name}"
+        bot.send_message(
+            message.chat.id, user_instance.strings.get("successful_upload", "")
+        )
 
-            return s3url
+        return s3url
 
     except Exception as e:
         bot.send_message(

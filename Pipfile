@@ -11,6 +11,9 @@ boto3 = "*"
 mysql-connector-python = "*"
 pymysql = "*"
 python-telegram = "*"
+streamlit = "*"
+pandas = "*"
+sqlalchemy = "*"
 
 [dev-packages]
 
