@@ -32,7 +32,6 @@ def save():
         
 def download_s3_object(url):
     # Extract the bucket name and object key from the S3 URL
-    # Example URL: https://your-bucket.s3.amazonaws.com/your-object-key
     s3_parts = url.split("/")
     bucket_name_extra = s3_parts[2]
     bucket_name = re.match(r'^([^\.]+)\.', bucket_name_extra).group(1)
@@ -42,20 +41,26 @@ def download_s3_object(url):
         # Create a Boto3 S3 client
         s3_client = boto3.client(
             "s3",
+            region_name='eu-north-1',
             aws_access_key_id=AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=AWS_SECRET_ACCESS_KEY
+            aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+            config=boto3.session.Config(signature_version='s3v4')
         )
 
-        response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
-        content = response["Body"].read()
+        # Get a pre-signed URL for the S3 object
+        presigned_url = s3_client.generate_presigned_url(
+            'get_object',
+            Params={'Bucket': bucket_name, 'Key': object_key},
+            ExpiresIn=3600  # URL expiration time in seconds (adjust as needed)
+        )
 
-        # Save the content to a local file
-        local_filename = object_key.split("/")[-1]
-        with open(local_filename, "wb") as local_file:
-            local_file.write(content)
-            
+        # Create a custom HTML button with JavaScript to trigger the file download
+        download_button = f'<a href="{presigned_url}" download>Download {object_key}</a>'
+        st.markdown(download_button, unsafe_allow_html=True)
+
     except Exception as e:
-        print(f"An error occurred while downloading the object: {e}")
+        st.error(f"An error occurred while generating the download link: {e}")
+
         
 def table_ind_page():
     st.title("Amazon RDS Table Viewer")
@@ -63,42 +68,28 @@ def table_ind_page():
     query = "SELECT * FROM user_data"
     df = pd.read_sql(query, engine)
 
-    # Display the table using Streamlit
-    st.write("### Table from Amazon RDS")
-
     # Iterate through each row and make final_testimony_url and Additional_Evidence_URL clickable
     for index, row in df.iterrows():
-        st.write(f"#### Row {index + 1}")
+        st.write(f"#### Individual {index + 1}")
 
-        # Make final_testimony_url clickable
-        st.write("Final Testimony URL:")
+        st.write("Final Testimony Files:")
         final_testimony_urls = row["Final_Testimony_URL"]
         if final_testimony_urls:
             final_testimony_urls = final_testimony_urls.split()
             for url in final_testimony_urls:
-                st.write(f"[{url}]({url})")
-
-                # Add a download button for each URL
-                download_button_label = "Download"
-                if st.button(download_button_label):
-                    download_s3_object(url)
+                download_s3_object(url)
         else:
-            st.write("No URLs available")
+            st.write("No Files available")
 
-        # Make Additional_Evidence_URL clickable
-        st.write("Additional Evidence URL:")
+        # Example st.write call in table_ind_page function
+        st.write("Additional Evidence Files:")
         additional_evidence_urls = row["Additional_Evidence_URL"]
         if additional_evidence_urls:
             additional_evidence_urls = additional_evidence_urls.split()
             for url in additional_evidence_urls:
-                st.write(f"[{url}]({url})")
-
-                # Add a download button for each URL
-                download_button_label = "Download"
-                if st.button(download_button_label):
-                    download_s3_object(url)
+                download_s3_object(url)
         else:
-            st.write("No URLs available")
+            st.write("No Files available")
 
         # Display other columns if needed
         st.write("Other Columns:")
