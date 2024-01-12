@@ -1,0 +1,13 @@
+cookie:
+  expiry_days: 1.0e-06
+  key: random_signature_key
+  name: random_cookie_name
+credentials:
+  usernames:
+    admin:
+      email: None
+      name: Admin
+      password: $2b$12$99YghG98LhK.uW/37yTdJOTXBavigG3bXHeQt3ByYPY8lsNDEfE4y
+preauthorized:
+  emails:
+  - None
