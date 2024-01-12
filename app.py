@@ -5,6 +5,8 @@ from sqlalchemy import create_engine
 import os
 from dotenv import load_dotenv
 import yaml
+import boto3
+import re
 from yaml.loader import SafeLoader
 
 with open('./config.yaml') as file:
@@ -27,7 +29,34 @@ engine = create_engine(f"mysql+mysqlconnector://{RDS_USER}:{RDS_PASSWORD}@{RDS_H
 def save():
     with open('config.yaml', 'w') as file:
         yaml.dump(config, file, default_flow_style=False)
+        
+def download_s3_object(url):
+    # Extract the bucket name and object key from the S3 URL
+    # Example URL: https://your-bucket.s3.amazonaws.com/your-object-key
+    s3_parts = url.split("/")
+    bucket_name_extra = s3_parts[2]
+    bucket_name = re.match(r'^([^\.]+)\.', bucket_name_extra).group(1)
+    object_key = "/".join(s3_parts[3:])
 
+    try:
+        # Create a Boto3 S3 client
+        s3_client = boto3.client(
+            "s3",
+            aws_access_key_id=AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=AWS_SECRET_ACCESS_KEY
+        )
+
+        response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
+        content = response["Body"].read()
+
+        # Save the content to a local file
+        local_filename = object_key.split("/")[-1]
+        with open(local_filename, "wb") as local_file:
+            local_file.write(content)
+            
+    except Exception as e:
+        print(f"An error occurred while downloading the object: {e}")
+        
 def table_ind_page():
     st.title("Amazon RDS Table Viewer")
 
@@ -48,6 +77,11 @@ def table_ind_page():
             final_testimony_urls = final_testimony_urls.split()
             for url in final_testimony_urls:
                 st.write(f"[{url}]({url})")
+
+                # Add a download button for each URL
+                download_button_label = "Download"
+                if st.button(download_button_label):
+                    download_s3_object(url)
         else:
             st.write("No URLs available")
 
@@ -58,12 +92,18 @@ def table_ind_page():
             additional_evidence_urls = additional_evidence_urls.split()
             for url in additional_evidence_urls:
                 st.write(f"[{url}]({url})")
+
+                # Add a download button for each URL
+                download_button_label = "Download"
+                if st.button(download_button_label):
+                    download_s3_object(url)
         else:
             st.write("No URLs available")
 
         # Display other columns if needed
         st.write("Other Columns:")
         st.write(row.drop(["Final_Testimony_URL", "Additional_Evidence_URL"]))
+
 
 def table_full_page():
     st.title("Amazon RDS Table Viewer")
