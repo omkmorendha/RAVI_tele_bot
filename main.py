@@ -34,11 +34,11 @@ with open("messages_farsi.json", "r") as json_file:
 
 
 class User:
-    def __init__(self, message):
+    def __init__(self, id):
         self.attributes = {}
         self.current_state = None
         self.strings = strings_eng
-        users[message.from_user.id] = self
+        users[id] = self
 
     def switch_lang(self):
         if self.strings == strings_eng:
@@ -296,7 +296,7 @@ class User:
             self.strings.get("restart_message", ""), callback_data="start"
         )
         button3 = types.InlineKeyboardButton(
-            self.strings.get("S23message", ""), callback_data="extra_data"
+            self.strings.get("S23message", ""), callback_data="extra_data_1"
         )
         button4 = types.InlineKeyboardButton(
             self.strings.get("S24message", ""), callback_data="M13"
@@ -330,9 +330,21 @@ class User:
         inline_markup.add(button1)
         bot.send_message(message.chat.id, message_txt, reply_markup=inline_markup)
 
-    def extra_data(self, message):
-        pass
-
+    def extra_data_1(self, message):
+        message_txt = self.strings.get("E1message", "")
+        bot.send_message(message.chat.id, message_txt)
+        self.current_state = 'e1'
+        
+    def extra_data_2(self, message):
+        message_txt = self.strings.get("E2message", "")
+        bot.send_message(message.chat.id, message_txt)
+        self.current_state = 'e2'
+    
+    def extra_data_3(self, message):
+        message_txt = self.strings.get("E3message", "")
+        bot.send_message(message.chat.id, message_txt)
+        self.current_state = 'e3'
+        
     def save_to_database(self):
         conn = pymysql.connect(
             host=RDS_HOST,
@@ -395,7 +407,7 @@ def redirect_to_user(chat_id_to_redirect):
 
 @bot.message_handler(commands=["start", "restart"])
 def send_messages(message):
-    new_user = User(message)
+    new_user = User(message.from_user.id)
     new_user.M1(message)
 
 
@@ -424,6 +436,28 @@ def handle_direct_input(message):
             user_instance.attributes["Additional_Evidence"] = message.text
             user_instance.current_state = None
             user_instance.M11(message)
+        
+        elif user_instance.current_state == "e1":
+            if(message.text != user_instance.strings.get("None_txt", "")):
+                user_instance.attributes["Telegram_ID"] = message.text
+            
+            user_instance.current_state = None
+            user_instance.extra_data_2(message)
+        
+        elif user_instance.current_state == "e2":
+            if(message.text != user_instance.strings.get("None_txt", "")):
+                user_instance.attributes["Whatsapp_number"] = message.text
+            
+            user_instance.current_state = None
+            user_instance.extra_data_3(message)
+        
+        elif user_instance.current_state == "e3":
+            if(message.text != user_instance.strings.get("None_txt", "")):
+                user_instance.attributes["Email"] = message.text
+            
+            user_instance.current_state = None
+            user_instance.M13(message)
+            
 
 
 def upload(message):
@@ -460,10 +494,10 @@ def upload(message):
 
 @bot.message_handler(content_types=["document", "photo", "audio", "video", "voice"])
 def handle_file_upload(message):
-    user_instance = users.get(message.from_user.id, None)
-
-    if user_instance is None:
-        user_instance = User()
+    if message.from_user.id in users:
+        user_instance = users.get(message.from_user.id, None)
+    else:
+        user_instance = User(message.from_user.id)
 
     if not user_instance.current_state:
         bot.send_message(
@@ -492,7 +526,10 @@ def handle_file_upload(message):
 
 @bot.callback_query_handler(func=lambda call: True)
 def handle_callback_query(call):
-    user_instance = users[call.message.chat.id]
+    if(call.message.chat.id in users):
+        user_instance = users[call.message.chat.id]
+    else:
+        user_instance = User(call.from_user.id)
 
     if call.data == "S1":
         user_instance.M2(call.message)
@@ -577,10 +614,16 @@ def handle_callback_query(call):
         user_instance.save_to_database()
         user_instance.M14(call.message)
 
-    elif call.data == "extra_data":
-        user_instance.extra_data(call.message)
+    elif call.data == "extra_data_1":
+        user_instance.extra_data_1(call.message)
+    
+    elif call.data == "extra_data_2":
+        user_instance.extra_data_1(call.message)
+    
+    elif call.data == "extra_data_3":
+        user_instance.extra_data_1(call.message)
 
 
 if __name__ == "__main__":
     users = {}
-    bot.polling()
+    bot.infinity_polling()

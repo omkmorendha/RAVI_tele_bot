@@ -2,8 +2,8 @@
     "M1message" : "Hi,\nI am RAVI, Ham Awa Association bot and the narrator of your story, so that the violence against Iranian girls and women is not forgotten in the dark.\nSome questions will be asked in order for you to submit your story; please follow the processes until you reach the finish of your story.\nPlease choose one of the options:",
     "M2message" : "Please select the sort of violence for which you will testify. \n(Family violence), (Educational Institute, ex: School, University, Seminary), Government Institute, ex: Police, Prison, Court, ...), (Work Place), (Society, ex: Streets , Park , Hospitals, Bank and ...)",
     "M3message" : "Who are you going to testify for?",
-    "M4message" : "Gender:",
-    "M5message" : "Age: ",
+    "M4message" : "Please choose the gender of a person subject to the testimony: ",
+    "M5message" : "Please provide us with your age or the age of a person whom you are sending the testimony",
     "M6message" : "Please write the city or resistance area of yourself or the individual for whom you are providing testimony.",
     "M7message" : "Please tell us who or what organization violated your rights",
     "M8message" : "Please choose the type of violation or abuse that you or the individual for whom you are providing testimony endured.",
@@ -42,6 +42,10 @@
     "S26message" : "I don't accept, finish without sending",
     "S27message" : "Send another response",
 
+    "E1message" : "Please enter your Telegram ID (or None)",
+    "E2message" : "Please enter you Whatsapp Number (or None)",
+    "E3message" : "Please enter your Email (or None)",
+
     "lang_switch" : "Switch to Farsi",
     "redirect_message" : "Click [here](https://t.me/@iranhamava) to send a message to an operator.",
     "edit_message" : "Edit Previous Message",
@@ -50,5 +54,6 @@
     "upload_options" : "Revert back or upload file",
     "successful_upload" : "Upload successful",
     "invalid_message" : "Invalid",
-    "nofile_message" : "Don't add any file/text"
+    "nofile_message" : "Don't add any file/text",
+    "None_txt" : "None"
 }
