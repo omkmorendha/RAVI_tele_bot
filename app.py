@@ -28,7 +28,44 @@ def save():
     with open('config.yaml', 'w') as file:
         yaml.dump(config, file, default_flow_style=False)
 
-def table_page():        
+def table_ind_page():
+    st.title("Amazon RDS Table Viewer")
+
+    query = "SELECT * FROM user_data"
+    df = pd.read_sql(query, engine)
+
+    # Display the table using Streamlit
+    st.write("### Table from Amazon RDS")
+
+    # Iterate through each row and make final_testimony_url and Additional_Evidence_URL clickable
+    for index, row in df.iterrows():
+        st.write(f"#### Row {index + 1}")
+
+        # Make final_testimony_url clickable
+        st.write("Final Testimony URL:")
+        final_testimony_urls = row["Final_Testimony_URL"]
+        if final_testimony_urls:
+            final_testimony_urls = final_testimony_urls.split()
+            for url in final_testimony_urls:
+                st.write(f"[{url}]({url})")
+        else:
+            st.write("No URLs available")
+
+        # Make Additional_Evidence_URL clickable
+        st.write("Additional Evidence URL:")
+        additional_evidence_urls = row["Additional_Evidence_URL"]
+        if additional_evidence_urls:
+            additional_evidence_urls = additional_evidence_urls.split()
+            for url in additional_evidence_urls:
+                st.write(f"[{url}]({url})")
+        else:
+            st.write("No URLs available")
+
+        # Display other columns if needed
+        st.write("Other Columns:")
+        st.write(row.drop(["Final_Testimony_URL", "Additional_Evidence_URL"]))
+
+def table_full_page():
     st.title("Amazon RDS Table Viewer")
 
     query = "SELECT * FROM user_data" 
@@ -51,13 +88,17 @@ def main():
         data = st.selectbox(
             "Option",
             (
-                "See Database",
+                "See Full Database",
+                "See Individuals",
                 "Reset Password"
             ),
         )
         
-        if data == "See Database":
-            table_page()
+        if data == "See Individuals":
+            table_ind_page()
+        
+        if data == "See Full Database":
+            table_full_page()
         
         elif data == "Reset Password":
             if authenticator.reset_password(username, 'Reset password'):
@@ -73,5 +114,3 @@ def main():
         
 if __name__ == "__main__":
     main()
-    # hashed_passwords = stauth.Hasher(['password', 'def']).generate()
-    # print(hashed_passwords)
