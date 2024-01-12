@@ -46,7 +46,7 @@
     "E2message" : "Please enter you Whatsapp Number (or None)",
     "E3message" : "Please enter your Email (or None)",
 
-    "lang_switch" : "Switch to Farsi",
+    "lang_switch" : "Switch to فارسی",
     "redirect_message" : "Click [here](https://t.me/@iranhamava) to send a message to an operator.",
     "edit_message" : "Edit Previous Message",
     "restart_message" : "Restart Everything",
