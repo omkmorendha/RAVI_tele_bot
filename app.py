@@ -63,50 +63,53 @@ def download_s3_object(url):
 
         
 def table_ind_page():
-    st.title("Amazon RDS Table Viewer")
-
-    query = "SELECT * FROM user_data"
-    df = pd.read_sql(query, engine)
-
-    # Iterate through each row and make final_testimony_url and Additional_Evidence_URL clickable
-    for index, row in df.iterrows():
-        st.write(f"#### Individual {index + 1}")
-
-        st.write("Final Testimony Files:")
-        final_testimony_urls = row["Final_Testimony_URL"]
-        if final_testimony_urls:
-            final_testimony_urls = final_testimony_urls.split()
-            for url in final_testimony_urls:
-                download_s3_object(url)
-        else:
-            st.write("No Files available")
-
-        # Example st.write call in table_ind_page function
-        st.write("Additional Evidence Files:")
-        additional_evidence_urls = row["Additional_Evidence_URL"]
-        if additional_evidence_urls:
-            additional_evidence_urls = additional_evidence_urls.split()
-            for url in additional_evidence_urls:
-                download_s3_object(url)
-        else:
-            st.write("No Files available")
-
-        # Display other columns if needed
-        st.write("Other Columns:")
-        st.write(row.drop(["Final_Testimony_URL", "Additional_Evidence_URL"]))
-
-
-def table_full_page():
-    st.title("Amazon RDS Table Viewer")
+    st.title("RAVI BOT SUBMISSIONS")
 
     query = "SELECT * FROM user_data" 
     df = pd.read_sql(query, engine)
 
-    # Display the table using Streamlit
-    st.write("### Table from Amazon RDS")
-    st.dataframe(df)
+    # Display the table using Streamlit with a button for each row
+    for index, row in df.iterrows():
+        st.write(f"#### Individual {index + 1}")
+
+        # Display other columns if needed
+        st.write("Data:")
+        st.write(row.drop(["Final_Testimony_URL", "Additional_Evidence_URL"]))
+
+        # Button to view and download all files for the current row
+        if st.button(f"View and Download Files for Individual {index + 1}"):
+            st.write("Final Testimony Files:")
+            final_testimony_urls = row["Final_Testimony_URL"]
+            if final_testimony_urls:
+                final_testimony_urls = final_testimony_urls.split()
+                for url in final_testimony_urls:
+                    download_s3_object(url)
+            else:
+                st.write("No Files available")
+
+            st.write("Additional Evidence Files:")
+            additional_evidence_urls = row["Additional_Evidence_URL"]
+            if additional_evidence_urls:
+                additional_evidence_urls = additional_evidence_urls.split()
+                for url in additional_evidence_urls:
+                    download_s3_object(url)
+            else:
+                st.write("No Files available")
+
+
+def table_full_page():
+    st.title("RAVI BOT SUBMISSIONS")
+
+    query = "SELECT * FROM user_data" 
+    df = pd.read_sql(query, engine)
+
+    # Display the table using Streamlita
+    df.index += 1
+    st.dataframe(df, width=0, height=0)
 
 def main():
+    st.set_page_config(layout="wide")
+
     authenticator = stauth.Authenticate(
         config['credentials'],
         config['cookie']['name'],
