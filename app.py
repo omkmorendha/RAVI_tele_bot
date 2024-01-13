@@ -70,31 +70,36 @@ def table_ind_page():
 
     # Display the table using Streamlit with a button for each row
     for index, row in df.iterrows():
-        st.write(f"#### Individual {index + 1}")
+        # Button to open sidebar for the current row
+        if st.button(f"Download Files for Individual {index + 1}"):
+            # Sidebar content for the current row
+            st.sidebar.title(f"Individual {index + 1} Details")
 
-        # Display other columns if needed
-        st.write("Data:")
-        st.write(row.drop(["Final_Testimony_URL", "Additional_Evidence_URL"]))
+            # Display other columns if needed
+            st.sidebar.write("Data:")
+            st.sidebar.write(row.drop(["Final_Testimony_URL", "Additional_Evidence_URL"]))
 
-        # Button to view and download all files for the current row
-        if st.button(f"View and Download Files for Individual {index + 1}"):
-            st.write("Final Testimony Files:")
+            # Display Final Testimony Files
+            st.sidebar.write("\nFinal Testimony Files:")
             final_testimony_urls = row["Final_Testimony_URL"]
             if final_testimony_urls:
                 final_testimony_urls = final_testimony_urls.split()
                 for url in final_testimony_urls:
                     download_s3_object(url)
+                    st.sidebar.write(f"- [View {os.path.basename(url)}]({url})")
             else:
-                st.write("No Files available")
+                st.sidebar.write("No Files available")
 
-            st.write("Additional Evidence Files:")
+            # Display Additional Evidence Files
+            st.sidebar.write("\nAdditional Evidence Files:")
             additional_evidence_urls = row["Additional_Evidence_URL"]
             if additional_evidence_urls:
                 additional_evidence_urls = additional_evidence_urls.split()
                 for url in additional_evidence_urls:
                     download_s3_object(url)
+                    st.sidebar.write(f"- [View {os.path.basename(url)}]({url})")
             else:
-                st.write("No Files available")
+                st.sidebar.write("No Files available")
 
 
 def table_full_page():
@@ -123,12 +128,12 @@ def main():
             "Option",
             (
                 "See Full Database",
-                "See Individuals",
+                "View and Download Individual Testimonies and Evidence",
                 "Reset Password"
             ),
         )
         
-        if data == "See Individuals":
+        if data == "View and Download Individual Testimonies and Evidence":
             table_ind_page()
         
         if data == "See Full Database":
