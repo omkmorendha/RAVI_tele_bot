@@ -37,7 +37,7 @@ def save():
         yaml.dump(config, file, default_flow_style=False)
 
 
-def download_s3_objects_as_zip(urls, zip_filename):
+def download_s3_objects_as_zip(urls, zip_filename, st=st):
     try:
         s3_client = boto3.client(
             "s3",
@@ -121,10 +121,32 @@ def table_full_page():
     query = "SELECT * FROM user_data"
     df = pd.read_sql(query, engine)
 
-    # Display the table using Streamlita
     df.index += 1
-    st.dataframe(df, width=0, height=0)
+    # Split the layout into two columns
+    col1, col2 = st.columns([5, 1])
 
+    # Display the dataframe in the first column
+    col1.dataframe(df, width=0, height=0)
+
+    # Display the download button in the second column
+    for index, row in df.iterrows():
+        button = col2.button(f"Download Files for Individual {index}")
+        if button:
+            final_testimony_urls = row["Final_Testimony_URL"]
+            additional_evidence_urls = row["Additional_Evidence_URL"]
+
+            if additional_evidence_urls or final_testimony_urls:
+                urls = []
+                if isinstance(final_testimony_urls, list) and isinstance(additional_evidence_urls, list):
+                    urls = additional_evidence_urls + final_testimony_urls
+                elif isinstance(final_testimony_urls, list):
+                    urls = final_testimony_urls
+                elif isinstance(additional_evidence_urls, list):
+                    urls = additional_evidence_urls
+
+                download_s3_objects_as_zip(urls, f"Individual_{index}_Files.zip", st=col2)
+            else:
+                col2.write(f"No Files to download for Individual_{index}")
 
 def main():
     st.set_page_config(layout="wide")
@@ -141,16 +163,16 @@ def main():
         data = st.selectbox(
             "Option",
             (
-                "See Full Database",
-                "View and Download Individual Testimonies and Evidence",
+                "See Full Table",
+                "View Individually",
                 "Reset Password",
             ),
         )
 
-        if data == "View and Download Individual Testimonies and Evidence":
+        if data == "View Individually":
             table_ind_page()
 
-        if data == "See Full Database":
+        if data == "See Full Table":
             table_full_page()
 
         elif data == "Reset Password":
