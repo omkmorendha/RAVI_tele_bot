@@ -137,17 +137,22 @@ def table_full_page():
 
             if additional_evidence_urls or final_testimony_urls:
                 urls = []
-                if isinstance(final_testimony_urls, list) and isinstance(additional_evidence_urls, list):
+                if isinstance(final_testimony_urls, list) and isinstance(
+                    additional_evidence_urls, list
+                ):
                     urls = additional_evidence_urls + final_testimony_urls
                 elif isinstance(final_testimony_urls, list):
                     urls = final_testimony_urls
                 elif isinstance(additional_evidence_urls, list):
                     urls = additional_evidence_urls
 
-                download_s3_objects_as_zip(urls, f"Individual_{index}_Files.zip", st=col2)
+                download_s3_objects_as_zip(
+                    urls, f"Individual_{index}_Files.zip", st=col2
+                )
             else:
                 col2.write(f"No Files to download for Individual_{index}")
 
+ 
 def main():
     st.set_page_config(layout="wide")
 
