@@ -37,6 +37,19 @@ def save():
         yaml.dump(config, file, default_flow_style=False)
 
 
+def convert_s3_url_to_console_url(s3_url):
+    match = re.match(r'https://([^\.]+)\.s3\.amazonaws\.com/(.*)', s3_url)
+    if match:
+        bucket_name = match.group(1)
+        object_key = match.group(2)
+
+        console_url = f'https://s3.console.aws.amazon.com/s3/object/{bucket_name}?prefix={object_key}'
+
+        return console_url
+    else:
+        return None
+
+
 def download_s3_objects_as_zip(urls, zip_filename, st=st):
     try:
         s3_client = boto3.client(
@@ -76,43 +89,48 @@ def table_ind_page():
 
     query = "SELECT * FROM user_data"
     df = pd.read_sql(query, engine)
+    df.index += 1
 
     for index, row in df.iterrows():
-        if st.button(f"Download Files for Individual {index + 1}"):
-            st.sidebar.title(f"Individual {index + 1} Details")
+        st.header(f"Individual {index} Details")
+
+        if(row["Telegram_ID"]):
+            st.write("Telegram ID:", row["Telegram_ID"])
+
+        if st.button(f"View all details for Individual {index}"):
+            st.sidebar.title(f"Files for Individual {index}")
             st.sidebar.write("Data:")
-            st.sidebar.write(
-                row.drop(["Final_Testimony_URL", "Additional_Evidence_URL"])
-            )
+            st.sidebar.dataframe(row.drop(["Final_Testimony_URL", "Additional_Evidence_URL"]))
 
             final_testimony_urls = row["Final_Testimony_URL"]
             if final_testimony_urls:
                 final_testimony_urls = final_testimony_urls.split()
                 st.sidebar.write("\nFinal Testimony Files:")
                 for url in final_testimony_urls:
-                    st.sidebar.write(f"- [View {os.path.basename(url)}]({url})")
+                    url = convert_s3_url_to_console_url(url)
+                    st.sidebar.write(f"- [View {url.rsplit('=', 1)[-1]}]({url})")
 
             additional_evidence_urls = row["Additional_Evidence_URL"]
             if additional_evidence_urls:
                 additional_evidence_urls = additional_evidence_urls.split()
                 st.sidebar.write("\nAdditional Evidence Files:")
                 for url in additional_evidence_urls:
-                    st.sidebar.write(f"- [View {os.path.basename(url)}]({url})")
+                    url = convert_s3_url_to_console_url(url)
+                    st.sidebar.write(f"- [View {url.rsplit('=', 1)[-1]}]({url})")
 
             if additional_evidence_urls or final_testimony_urls:
                 urls = []
-                if isinstance(final_testimony_urls, list) and isinstance(
-                    additional_evidence_urls, list
-                ):
+                if isinstance(final_testimony_urls, list) and isinstance(additional_evidence_urls, list):
                     urls = additional_evidence_urls + final_testimony_urls
                 elif isinstance(final_testimony_urls, list):
                     urls = final_testimony_urls
                 elif isinstance(additional_evidence_urls, list):
                     urls = additional_evidence_urls
 
-                download_s3_objects_as_zip(urls, f"Individual_{index + 1}_Files.zip")
+                download_s3_objects_as_zip(urls, f"Individual_{index}_Files.zip")
             else:
-                st.write(f"No Files to download for Individual_{index + 1}")
+                st.sidebar.write(f"No Files uploaded by Individual {index}")
+                st.write(f"No Files to download for Individual_{index}")
 
 
 def table_full_page():

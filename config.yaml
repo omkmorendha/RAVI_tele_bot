@@ -1,5 +1,5 @@
 cookie:
-  expiry_days: 1.0e-06
+  expiry_days: 1
   key: random_signature_key
   name: random_cookie_name
 credentials:
