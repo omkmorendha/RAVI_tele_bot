@@ -36,18 +36,36 @@ def save():
     with open("config.yaml", "w") as file:
         yaml.dump(config, file, default_flow_style=False)
 
+def download_s3_object(url):
+    # Extract the bucket name and object key from the S3 URL
+    s3_parts = url.split("/")
+    bucket_name_extra = s3_parts[2]
+    bucket_name = re.match(r'^([^\.]+)\.', bucket_name_extra).group(1)
+    object_key = "/".join(s3_parts[3:])
 
-def convert_s3_url_to_console_url(s3_url):
-    match = re.match(r'https://([^\.]+)\.s3\.amazonaws\.com/(.*)', s3_url)
-    if match:
-        bucket_name = match.group(1)
-        object_key = match.group(2)
+    try:
+        # Create a Boto3 S3 client
+        s3_client = boto3.client(
+            "s3",
+            region_name='eu-north-1',
+            aws_access_key_id=AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+            config=boto3.session.Config(signature_version='s3v4')
+        )
 
-        console_url = f'https://s3.console.aws.amazon.com/s3/object/{bucket_name}?prefix={object_key}'
+        # Get a pre-signed URL for the S3 object
+        presigned_url = s3_client.generate_presigned_url(
+            'get_object',
+            Params={'Bucket': bucket_name, 'Key': object_key},
+            ExpiresIn=3600  # URL expiration time in seconds (adjust as needed)
+        )
 
-        return console_url
-    else:
-        return None
+        # Create a custom HTML button with JavaScript to trigger the file download
+        download_button = f'<a href="{presigned_url}" download>Download {object_key}</a>'
+        st.sidebar.markdown(download_button, unsafe_allow_html=True)
+
+    except Exception as e:
+        st.error(f"An error occurred while generating the download link: {e}")
 
 
 def download_s3_objects_as_zip(urls, zip_filename, st=st):
@@ -107,16 +125,15 @@ def table_ind_page():
                 final_testimony_urls = final_testimony_urls.split()
                 st.sidebar.write("\nFinal Testimony Files:")
                 for url in final_testimony_urls:
-                    url = convert_s3_url_to_console_url(url)
-                    st.sidebar.write(f"- [View {url.rsplit('=', 1)[-1]}]({url})")
+                    download_s3_object(url)
+
 
             additional_evidence_urls = row["Additional_Evidence_URL"]
             if additional_evidence_urls:
                 additional_evidence_urls = additional_evidence_urls.split()
                 st.sidebar.write("\nAdditional Evidence Files:")
                 for url in additional_evidence_urls:
-                    url = convert_s3_url_to_console_url(url)
-                    st.sidebar.write(f"- [View {url.rsplit('=', 1)[-1]}]({url})")
+                    download_s3_object(url)
 
             if additional_evidence_urls or final_testimony_urls:
                 urls = []
@@ -140,35 +157,7 @@ def table_full_page():
     df = pd.read_sql(query, engine)
 
     df.index += 1
-    # Split the layout into two columns
-    col1, col2 = st.columns([5, 1])
-
-    # Display the dataframe in the first column
-    col1.dataframe(df, width=0, height=0)
-
-    # Display the download button in the second column
-    for index, row in df.iterrows():
-        button = col2.button(f"Download Files for Individual {index}")
-        if button:
-            final_testimony_urls = row["Final_Testimony_URL"]
-            additional_evidence_urls = row["Additional_Evidence_URL"]
-
-            if additional_evidence_urls or final_testimony_urls:
-                urls = []
-                if isinstance(final_testimony_urls, list) and isinstance(
-                    additional_evidence_urls, list
-                ):
-                    urls = additional_evidence_urls + final_testimony_urls
-                elif isinstance(final_testimony_urls, list):
-                    urls = final_testimony_urls
-                elif isinstance(additional_evidence_urls, list):
-                    urls = additional_evidence_urls
-
-                download_s3_objects_as_zip(
-                    urls, f"Individual_{index}_Files.zip", st=col2
-                )
-            else:
-                col2.write(f"No Files to download for Individual_{index}")
+    st.dataframe(df, width=0, height=0)
 
  
 def main():
@@ -186,16 +175,16 @@ def main():
         data = st.selectbox(
             "Option",
             (
-                "See Full Table",
-                "View Individually",
+                "View Individual Entries",
+                "View Full Entries",
                 "Reset Password",
             ),
         )
 
-        if data == "View Individually":
+        if data == "View Individual Entries":
             table_ind_page()
 
-        if data == "See Full Table":
+        if data == "View Full Entries":
             table_full_page()
 
         elif data == "Reset Password":
