@@ -6,6 +6,7 @@ import json
 import requests
 from telebot import TeleBot, types
 from dotenv import load_dotenv
+import emoji
 
 load_dotenv()
 
@@ -67,7 +68,7 @@ class User:
         bot.send_message(message.chat.id, message_txt, reply_markup=markup)
 
     def M2(self, message):
-        markup = types.InlineKeyboardMarkup()
+        markup = types.InlineKeyboardMarkup(row_width=1)
         message_txt = self.strings.get("M2message", "")
         button1 = types.InlineKeyboardButton(
             self.strings.get("S4message", ""), callback_data="S4"
@@ -92,7 +93,7 @@ class User:
         bot.send_message(message.chat.id, message_txt, reply_markup=markup)
 
     def M3(self, message):
-        markup = types.InlineKeyboardMarkup()
+        markup = types.InlineKeyboardMarkup(row_width=1)
         message_txt = self.strings.get("M3message", "")
         button1 = types.InlineKeyboardButton(
             self.strings.get("S9message", ""), callback_data="S9"
@@ -110,7 +111,7 @@ class User:
         bot.send_message(message.chat.id, message_txt, reply_markup=markup)
 
     def M4(self, message):
-        markup = types.InlineKeyboardMarkup()
+        markup = types.InlineKeyboardMarkup(row_width=1)
         message_txt = self.strings.get("M4message", "")
         button1 = types.InlineKeyboardButton(
             self.strings.get("S11message", ""), callback_data="S11"
@@ -132,7 +133,7 @@ class User:
         bot.send_message(message.chat.id, message_txt, reply_markup=markup)
 
     def M5(self, message):
-        markup = types.InlineKeyboardMarkup()
+        markup = types.InlineKeyboardMarkup(row_width=1)
         message_txt = self.strings.get("M5message", "")
         button1 = types.InlineKeyboardButton(
             self.strings.get("S14message", ""), callback_data="S14"
@@ -157,7 +158,7 @@ class User:
         bot.send_message(message.chat.id, message_txt, reply_markup=markup)
 
     def M6(self, message):
-        inline_markup = types.InlineKeyboardMarkup()
+        inline_markup = types.InlineKeyboardMarkup(row_width=1)
         message_txt = self.strings.get("M6message", "")
 
         button1 = types.InlineKeyboardButton(
@@ -175,7 +176,7 @@ class User:
         self.current_state = "M6"
 
     def M7(self, message):
-        inline_markup = types.InlineKeyboardMarkup()
+        inline_markup = types.InlineKeyboardMarkup(row_width=1)
         message_txt = self.strings.get("M7message", "")
 
         button1 = types.InlineKeyboardButton(
@@ -193,7 +194,7 @@ class User:
         self.current_state = "M7"
 
     def M8(self, message):
-        markup = types.InlineKeyboardMarkup()
+        markup = types.InlineKeyboardMarkup(row_width=1)
         message_txt = self.strings.get("M8message", "")
         button1 = types.InlineKeyboardButton(
             self.strings.get("S18message", ""), callback_data="S18"
@@ -221,7 +222,7 @@ class User:
         bot.send_message(message.chat.id, message_txt, reply_markup=markup)
 
     def M9(self, message):
-        inline_markup = types.InlineKeyboardMarkup()
+        inline_markup = types.InlineKeyboardMarkup(row_width=1)
         message_txt = self.strings.get("M9message", "")
 
         button1 = types.InlineKeyboardButton(
@@ -244,7 +245,7 @@ class User:
         self.attributes["Final_Testimony_URL"] = []
 
     def M10(self, message):
-        inline_markup = types.InlineKeyboardMarkup()
+        inline_markup = types.InlineKeyboardMarkup(row_width=1)
         message_txt = self.strings.get("M10message", "")
 
         button1 = types.InlineKeyboardButton(
@@ -270,7 +271,7 @@ class User:
         self.attributes["Additional_Evidence_URL"] = []
 
     def M11(self, message):
-        inline_markup = types.InlineKeyboardMarkup()
+        inline_markup = types.InlineKeyboardMarkup(row_width=1)
         message_txt = self.strings.get("M11message", "")
 
         button1 = types.InlineKeyboardButton(
@@ -287,7 +288,7 @@ class User:
         bot.send_message(message.chat.id, message_txt, reply_markup=inline_markup)
 
     def M12(self, message):
-        inline_markup = types.InlineKeyboardMarkup()
+        inline_markup = types.InlineKeyboardMarkup(row_width=1)
         message_txt = self.strings.get("M12message", "")
 
         button1 = types.InlineKeyboardButton(
@@ -307,7 +308,7 @@ class User:
         bot.send_message(message.chat.id, message_txt, reply_markup=inline_markup)
 
     def M13(self, message):
-        inline_markup = types.InlineKeyboardMarkup()
+        inline_markup = types.InlineKeyboardMarkup(row_width=1)
         message_txt = self.strings.get("M13message", "")
 
         button1 = types.InlineKeyboardButton(
@@ -321,7 +322,7 @@ class User:
         bot.send_message(message.chat.id, message_txt, reply_markup=inline_markup)
 
     def M14(self, message):
-        inline_markup = types.InlineKeyboardMarkup()
+        inline_markup = types.InlineKeyboardMarkup(row_width=1)
         message_txt = self.strings.get("M14message", "")
 
         button1 = types.InlineKeyboardButton(
@@ -413,11 +414,16 @@ def send_messages(message):
 
 
 # Message handler for direct input
-@bot.message_handler(func=lambda message: True)  # hasattr(message, 'text'))
+@bot.message_handler(func=lambda message: True)
 def handle_direct_input(message):
     user_instance = users.get(message.from_user.id, None)
 
     if user_instance and hasattr(user_instance, "current_state"):
+        if user_instance.current_state in ["M6", "M7"]:
+            if emoji.emoji_count(message.text) > 0:
+                bot.send_message(message.chat.id, user_instance.strings.get("emoji_message", ""))
+                return
+
         if user_instance.current_state == "M6":
             user_instance.attributes["Area_of_Residence"] = message.text
             user_instance.current_state = None

@@ -55,5 +55,6 @@
     "successful_upload" : "Upload successful",
     "invalid_message" : "Invalid",
     "nofile_message" : "Don't add any file/text",
-    "None_txt" : "None"
+    "None_txt" : "None",
+    "emoji_message" : "Please avoid using emojis in your response."
 }

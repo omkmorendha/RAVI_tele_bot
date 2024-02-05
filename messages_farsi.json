@@ -55,5 +55,6 @@
     "successful_upload" : "آپلود با موفقیت انجام شد",
     "invalid_message" : "بی اعتبار",
     "nofile_message" : "هیچ فایل/متنی اضافه نکنید",
-    "None_txt" : "هیچ"
+    "None_txt" : "هیچ",
+    "emoji_message" : "لطفا از استفاده از ایموجی در پاسخ خودداری کنید."
 }
