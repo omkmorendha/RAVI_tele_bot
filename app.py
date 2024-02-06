@@ -169,49 +169,53 @@ def is_valid_json(input_text):
 
 def edit_messages():
     st.title("Edit Messages")
+    st.caption("Enter the text and press Ctrl + Enter to save")
 
+    # Load English messages
     with open("messages_eng.json", "r", encoding="utf-8") as json_file_eng:
         messages_eng = json.load(json_file_eng)
 
+    # Load Farsi messages
     with open("messages_farsi.json", "r", encoding="utf-8") as json_file_farsi:
         messages_farsi = json.load(json_file_farsi)
 
-    st.caption("After entering the new text either press this button and press Ctrl+Enter")
-    
-    if st.button("Save (Ctrl + Enter)"):
-        try:
-            with open("messages_eng.json", "w", encoding="utf-8") as json_file_eng:
-                json.dump(messages_eng, json_file_eng, ensure_ascii=False, indent=2)
-
-            with open("messages_farsi.json", "w", encoding="utf-8") as json_file_farsi:
-                json.dump(messages_farsi, json_file_farsi, ensure_ascii=False, indent=2)
-
-            st.success("Messages have been updated successfully.")
-        except Exception as e:
-            st.error(f"An error occurred while saving messages: {e}")
-
+    # Display messages for editing
     col1, col2 = st.columns(2)
 
     with col1:
         st.header("English Messages")
         for key, value in messages_eng.items():
-            new_value_eng = st.text_area(f"Edit message for {key}", value, key=f"eng_{key}")
+            new_value_eng = st.text_area(f"Edit message for {key}", value)
             try:
+                # Attempt to load as JSON
                 json.loads(new_value_eng)
                 messages_eng[key] = new_value_eng
             except json.JSONDecodeError:
-                
-                messages_eng[key] = new_value_eng
+                messages_eng[key] = new_value_eng  # Accept plain text
+
     with col2:
         st.header("Farsi Messages")
         for key, value in messages_farsi.items():
-            new_value_farsi = st.text_area(f"Edit message for {key}", value, key=f"farsi_{key}")
+            new_value_farsi = st.text_area(f"Edit message for {key}", value)
             try:
                 # Attempt to load as JSON
                 json.loads(new_value_farsi)
                 messages_farsi[key] = new_value_farsi
             except json.JSONDecodeError:
-                messages_farsi[key] = new_value_farsi
+                messages_farsi[key] = new_value_farsi  # Accept plain text
+
+    # Save the updated messages back to the JSON files
+    try:
+        with open("messages_eng.json", "w", encoding="utf-8") as json_file_eng:
+            json.dump(messages_eng, json_file_eng, ensure_ascii=False, indent=2)
+
+        with open("messages_farsi.json", "w", encoding="utf-8") as json_file_farsi:
+            json.dump(messages_farsi, json_file_farsi, ensure_ascii=False, indent=2)
+
+        #st.success("Messages have been updated successfully.")
+    except Exception as e:
+        st.error(f"An error occurred while saving messages: {e}")
+
  
 def main():
     st.set_page_config(layout="wide")
