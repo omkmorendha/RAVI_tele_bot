@@ -8,9 +8,10 @@ import yaml
 import boto3
 import re
 import base64
-from io import BytesIO, StringIO
+from io import BytesIO
 import zipfile
 from yaml.loader import SafeLoader
+import json
 
 with open("./config.yaml") as file:
     config = yaml.load(file, Loader=SafeLoader)
@@ -159,6 +160,58 @@ def table_full_page():
     df.index += 1
     st.dataframe(df, width=0, height=0)
 
+def is_valid_json(input_text):
+    try:
+        json.loads(input_text)
+        return True
+    except (json.JSONDecodeError, TypeError):
+        return False
+
+def edit_messages():
+    st.title("Edit Messages")
+
+    with open("messages_eng.json", "r", encoding="utf-8") as json_file_eng:
+        messages_eng = json.load(json_file_eng)
+
+    with open("messages_farsi.json", "r", encoding="utf-8") as json_file_farsi:
+        messages_farsi = json.load(json_file_farsi)
+
+    st.caption("After entering the new text either press this button and press Ctrl+Enter")
+    
+    if st.button("Save (Ctrl + Enter)"):
+        try:
+            with open("messages_eng.json", "w", encoding="utf-8") as json_file_eng:
+                json.dump(messages_eng, json_file_eng, ensure_ascii=False, indent=2)
+
+            with open("messages_farsi.json", "w", encoding="utf-8") as json_file_farsi:
+                json.dump(messages_farsi, json_file_farsi, ensure_ascii=False, indent=2)
+
+            st.success("Messages have been updated successfully.")
+        except Exception as e:
+            st.error(f"An error occurred while saving messages: {e}")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.header("English Messages")
+        for key, value in messages_eng.items():
+            new_value_eng = st.text_area(f"Edit message for {key}", value, key=f"eng_{key}")
+            try:
+                json.loads(new_value_eng)
+                messages_eng[key] = new_value_eng
+            except json.JSONDecodeError:
+                
+                messages_eng[key] = new_value_eng
+    with col2:
+        st.header("Farsi Messages")
+        for key, value in messages_farsi.items():
+            new_value_farsi = st.text_area(f"Edit message for {key}", value, key=f"farsi_{key}")
+            try:
+                # Attempt to load as JSON
+                json.loads(new_value_farsi)
+                messages_farsi[key] = new_value_farsi
+            except json.JSONDecodeError:
+                messages_farsi[key] = new_value_farsi
  
 def main():
     st.set_page_config(layout="wide")
@@ -178,19 +231,24 @@ def main():
                 "View Individual Entries",
                 "View Full Entries",
                 "Reset Password",
+                "Edit Messages",
             ),
         )
 
         if data == "View Individual Entries":
             table_ind_page()
 
-        if data == "View Full Entries":
+        elif data == "View Full Entries":
             table_full_page()
 
         elif data == "Reset Password":
             if authenticator.reset_password(username, "Reset password"):
                 st.success("Password modified successfully")
                 save()
+        
+        elif data == "Edit Messages":
+            edit_messages()
+
 
         authenticator.logout("Logout", "main")
 
